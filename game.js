@@ -152,7 +152,6 @@ function endGame() {
 function goMain() {
   clearInterval(gameTimer);
   showScreen('main-screen');
-  loadMainRanking();
 }
 
 // ══════════════════════════════════════════
@@ -233,21 +232,8 @@ function escapeHtml(str) {
   );
 }
 
-async function loadMainRanking() {
-  const list = document.getElementById('main-ranking-list');
-  if (!list) return;
-  list.innerHTML = '<div class="rank-loading">불러오는 중...</div>';
-  try {
-    const data = await sb.getTop10();
-    renderRankingList(list, data);
-  } catch {
-    list.innerHTML = '<div class="rank-loading">랭킹을 불러올 수 없습니다.</div>';
-  }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('nickname-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitRanking();
   });
-  loadMainRanking();
 });

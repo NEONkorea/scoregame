@@ -31,6 +31,20 @@ const sb = {
     );
     if (!res.ok) throw new Error(await res.text());
     return res.json();
+  },
+
+  async resetAll() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/rankings?id=gte.0`,
+      {
+        method: 'DELETE',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      }
+    );
+    if (!res.ok) throw new Error(await res.text());
   }
 };
 
@@ -135,11 +149,11 @@ function endGame() {
   document.querySelectorAll('.block').forEach(b => b.className = 'block');
   document.getElementById('result-score').textContent = score;
   const ranks = [
-    [0,  'BEGINNER...다시 해봐!'],
+    [0,  'BEGINNER... 다시 해봐!'],
     [5,  'NOT BAD! 조금만 더!'],
     [10, 'GOOD JOB! 빠른 손!'],
     [15, 'EXCELLENT!! 최강!'],
-    [20, 'PIXEL MASTER'],
+    [20, 'SCORE MASTER'],
   ];
   let rank = ranks[0][1];
   for (const [threshold, label] of ranks) {
@@ -152,6 +166,7 @@ function endGame() {
 function goMain() {
   clearInterval(gameTimer);
   showScreen('main-screen');
+  loadMainRanking();
 }
 
 // ══════════════════════════════════════════
@@ -232,8 +247,21 @@ function escapeHtml(str) {
   );
 }
 
+async function loadMainRanking() {
+  const list = document.getElementById('main-ranking-list');
+  if (!list) return;
+  list.innerHTML = '<div class="rank-loading">불러오는 중...</div>';
+  try {
+    const data = await sb.getTop10();
+    renderRankingList(list, data);
+  } catch {
+    list.innerHTML = '<div class="rank-loading">랭킹을 불러올 수 없습니다.</div>';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('nickname-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') submitRanking();
   });
+  loadMainRanking();
 });
